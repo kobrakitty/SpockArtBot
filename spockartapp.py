@@ -12,7 +12,7 @@ client = OpenAI(
 )
 
 # Step 2: Main Page Title & Description
-st.title('👽AI Spock Art Critique🛸')
+st.title('👽AI Spock Art Critique Bot🛸')
 st.subheader('I am AI Spock Art Critique Bot. I critique art you share with me using an image URL. Your image and my critique will appear below. Have fun!', divider='rainbow')
 
 # Step 3: Sidebar Title and Design Elements
