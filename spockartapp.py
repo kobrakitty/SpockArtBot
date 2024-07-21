@@ -21,7 +21,7 @@ st.sidebar.image("grumpyspock_byglitterpileai.jpg")
 
 # Step 4: Create form for user input 
 with st.sidebar.form(key='input_form'):
-    user_input = st.text_area("Enter Your Image URL Here")
+    user_input = st.text_area("Enter Your Image URL Below:")
     submit_button = st.form_submit_button(label='SUBMIT🚀')
 
 # Step 5: Definition and Function to analyze image using OpenAI
