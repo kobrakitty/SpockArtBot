@@ -5,9 +5,7 @@ import os
 
 # Get your OpenAI API key from environment variables
 api_key = os.getenv("OPENAI_API_KEY")  # Used in production
-
-# Create OpenAI client
-client = OpenAI(api_key=api_key)
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY")) 
 
 # Step 2: Main Page Title & Description
 st.title('👽AI Spock Art Critique Bot🛸')
