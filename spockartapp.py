@@ -1,8 +1,12 @@
 # Step 1: Setup
 import streamlit as st
+import requests
 from openai import OpenAI
+from io import BytesIO
 import os
-import io
+
+# Define the API endpoint for image analysis
+api_endpoint = "https://api.openai.com/v1/images/generations"
 
 # Get your OpenAI API key from environment variables
 api_key = os.getenv("OPENAI_API_KEY")  # Used in production
@@ -10,7 +14,7 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # Step 2: Main Page Title & Description
 st.title('👽AI Spock Art Critique Bot🛸')
-st.subheader('I critique art shared with me using an image URL or uploaded image. Your image and my critique will appear below. Have fun!', divider='rainbow')
+st.subheader('Hello! I critique art you share with me. Either enter a URL or upload an image and click SUBMIT. Your art and my critique will appear below. Have fun!', divider='rainbow')
 
 # Step 3: Sidebar Title and Design Elements
 st.sidebar.title("Try It Out🎨")
@@ -20,7 +24,7 @@ st.sidebar.image("grumpyspock_byglitterpileai.jpg")
 with st.sidebar.form(key='input_form'):
     user_input = st.text_area("Enter Your Image URL Here")
     uploaded_file = st.file_uploader("Or upload an image file", type=["jpg", "jpeg", "png"])
-    submit_button = st.form_submit_button(label='SUBMIT🚀')
+    submit_button = st.form_submit_button(label='SUBMIT🚀')                   
 
 # Step 5: Definition and Function to analyze image using OpenAI
 def analyze_artwork_with_gpt4_vision(user_input):
@@ -36,7 +40,7 @@ def analyze_artwork_with_gpt4_vision(user_input):
     try:
         response = client.chat.completions.create(
             messages=messages,
-            model="gpt-4o",
+            model="gpt-4o Turbo",
             temperature=0  # Lower temperature for less random responses
         )
         
@@ -46,24 +50,27 @@ def analyze_artwork_with_gpt4_vision(user_input):
         st.error(f"Error: {e}")
         return str(e)
 
-# Step 6: Handle form submission and display result
+# Function to analyze image with GPT-4 Turbo
 if submit_button:
-    image_url = user_input if user_input else None
-    if uploaded_file is not None:
-        # Save the uploaded file to a temporary location
-        with open("temp_image", "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        image_url = "temp_image"  # Set image_url to the temporary file path
+    if uploaded_file:
+        # Read the uploaded file
+        image_file = BytesIO(uploaded_file.getvalue())
+        st.image(uploaded_file, caption='Your Image', use_column_width=True)
+    elif user_input:
+        # Fetch the image from URL and convert it to a BytesIO object
+        response = requests.get(user_input)
+        image_file = BytesIO(response.content)
+        st.image(user_input, caption='Your Image', use_column_width=True)
+    else:
+        st.error("No image provided.")
+        image_file = None
 
-    if image_url:
+    if image_file:
         with st.spinner('🌟Critiquing...'):
-            critique_result = analyze_artwork_with_gpt4_vision(image_url) 
-            # Display the image
-            st.image(image_url, caption='Your Image', use_column_width=True)
-            # Display the generated response
+            critique_result = analyze_artwork_with_gpt4_vision(image_file)
             st.markdown("### Spock Says...")
             st.write(critique_result)
-
+            
             # Add a download button for text
             def get_text_file(content):
                 buffer = io.StringIO()
