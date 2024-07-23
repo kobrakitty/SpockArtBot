@@ -2,6 +2,7 @@
 import streamlit as st
 from openai import OpenAI
 import os
+import streamlit_copy_to_clipboard as stc
 
 # Get your OpenAI API key from environment variables
 api_key = os.getenv("OPENAI_API_KEY")  # Used in production
@@ -19,10 +20,11 @@ st.subheader('I am AI Spock Art Critique Bot. I critique art you share with me u
 st.sidebar.title("Try It Out🎨")
 st.sidebar.image("grumpyspock_byglitterpileai.jpg")
 
-# Step 4: Create form for user input 
+# Step 4: Create form for user input
 with st.sidebar.form(key='input_form'):
-    user_input = st.text_area("Enter Your Image URL Below:")
-    submit_button = st.form_submit_button(label='SUBMIT🚀')
+    user_input = st.text_area("Enter Your Image URL Here")
+    uploaded_file = st.file_uploader("Or upload an image file", type=["jpg", "jpeg", "png"])
+    submit_button = st.form_submit_button(label='🚀Submit🚀!')
 
 # Step 5: Definition and Function to analyze image using OpenAI
 def analyze_artwork_with_gpt4_vision(user_input):
@@ -54,11 +56,38 @@ def analyze_artwork_with_gpt4_vision(user_input):
         return str(e)
     
 # Step 6: Handle form submission and display result
-if submit_button and user_input:
+if submit_button and (user_input or uploaded_file):
     with st.spinner('🌟Critiquing...'):
-        critique_result = analyze_artwork_with_gpt4_vision(user_input) 
-        # Display the image
-        st.image(user_input, caption='Your Image', use_column_width=True)
+        # If a file is uploaded, use that file for the critique
+        if uploaded_file:
+            # Save the uploaded file to a temporary location
+            image_path = os.path.join("temp", uploaded_file.name)
+            with open(image_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            # Update user_input to be the local path of the uploaded file
+            user_input = image_path
+
+        result = critique_art(user_input)
+        
+        # Show the image URL or uploaded image on the main page
+        st.write("### Entered Image URL or Uploaded Image")
+        if uploaded_file:
+            st.image(user_input, caption='Uploaded Image', use_column_width=True)
+        else:
+            st.write(user_input)
+            st.image(user_input, caption='Entered Image', use_column_width=True)
+        
         # Display the generated response
-        st.markdown("### Spock Says...")
-        st.write(critique_result)       
+        st.write("### Generated Critique")
+        st.write(result)
+        
+        # Copy to clipboard button
+        stc.copy_to_clipboard(result)
+        
+        # Option to iterate further
+        if st.button("Generate Again"):
+            with st.spinner('🌟Critiquing again...'):
+                result = critique_art(user_input)
+                st.write("### Generated Critique")
+                st.write(result)
+                stc.copy_to_clipboard(result)   
