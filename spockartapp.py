@@ -2,7 +2,7 @@
 import streamlit as st
 import requests
 from openai import OpenAI
-from io import BytesIO
+from io import BytesIO, StringIO
 import os
 
 # Define the API endpoint for image analysis
