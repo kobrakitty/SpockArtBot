@@ -1,19 +1,17 @@
 # Step 1: Setup
 import streamlit as st
-from openai import OpenAI
+import openai
 import os
 
 # Get your OpenAI API key from environment variables
-api_key = os.getenv("OPENAI_API_KEY")  # Used in production
+# api_key = os.getenv("OPENAI_API_KEY")  # Used in production
 
-# Initialize the client with your API key
-client = OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY")  # Ensure your API key is set in the environment variables
-)
+# Uncomment the next line and add your API key for local testing
+api_key = "your_openai_api_key_here"
 
 # Step 2: Main Page Title & Description
-st.title('👽AI Spock Art Critique Bot🛸')
-st.subheader('I am AI Spock Art Critique Bot. I critique art you share with me using an image URL. Your image and my critique will appear below. Have fun!', divider='rainbow')
+st.title('👽Spock Art Critique🛸')
+st.subheader('I am the AI Spock Art Critique Bot. I critique art you share with me using an image URL. Your image and my critique will appear below after my critique is complete.✨Remember, always verify AI-generated responses.')
 
 # Step 3: Sidebar Title and Design Elements
 st.sidebar.title("Try It Out🎨")
@@ -26,34 +24,29 @@ with st.sidebar.form(key='input_form'):
     submit_button = st.form_submit_button(label='🚀Submit🚀!')
 
 # Step 5: Definition and Function to analyze image using OpenAI
-def analyze_artwork_with_gpt4_vision(user_input):
+def critique_art(image_url):
     if not api_key:
         st.error("OpenAI API key is not set. Please set it in your environment variables.")
         return "OpenAI API key not set."
     
-    OpenAI.api_key = api_key
-    
-    # Create OpenAI client
-    client = OpenAI(api_key=api_key)
+    openai.api_key = api_key
     
     # Instructions for the AI (adjust if needed)
     messages = [
-        {"role": "system", "content": "You are Spock from the original Star Trek series from the 1960s. Your main purpose is to provide art critiques of images from the user. Your answers should be logical, concise, and devoid of emotional language. However you shoudl always greet the user and introduce yourself as Spock with the Live Long and Prosper emoji. Maintain a formal tone, using precise vocabulary and structured sentences. Include scientific or analytical explanations where applicable. The critique should focus on aspects such as composition, use of color, technique, perspective, and thematic elements. You will avoid subjective language; instead, rely on objective observations and logical analysis. Ask clarifying questions if additional information is needed to provide a logical response. At the end of the response, share a fun fact about Star Trek The Original Series and wish them well with a UFO emoji."},
-        {"role": "user", "content": f"Review the following image:\n{user_input}"}
+        {"role": "system", "content": "You are Spock from the original Star Trek series from the 1960s. Your main purpose is to provide art critiques of images that you review based on the URL that a user enters. Your answers should be logical, concise, and devoid of emotional language. Maintain a formal tone, using precise vocabulary and structured sentences. Include scientific or analytical explanations where applicable. Critique only the art provided via URL. The AI chatbot should only respond to prompts that include a URL to a piece of art. If a prompt does not include a URL, the chatbot should respond with: Please provide a URL to the artwork you wish to be critiqued. The critique should focus on aspects such as composition, use of color, technique, perspective, and thematic elements. You will avoid subjective language; instead, rely on objective observations and logical analysis. Ask clarifying questions if additional information is needed to provide a logical response."},
+        {"role": "user", "content": f"Review the following image from the URL:\n{image_url}"}
     ]
     try:
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
             messages=messages,
-            model="gpt-4-vision-preview",
             temperature=0  # Lower temperature for less random responses
         )
-        
-        # Extract the critique from the response
-        return response.choices[0].message.content
+        return response['choices'][0]['message']['content']
     except Exception as e:
         st.error(f"Error: {e}")
         return str(e)
-    
+
 # Step 6: Handle form submission and display result
 if submit_button and (user_input or uploaded_file):
     with st.spinner('🌟Critiquing...'):
