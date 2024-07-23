@@ -7,8 +7,10 @@ import io
 # Get your OpenAI API key from environment variables
 api_key = os.getenv("OPENAI_API_KEY")  # Used in production
 
-# Create OpenAI client
-client = OpenAI(api_key=api_key)
+# Initialize the client with your API key
+client = OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY")  # Ensure your API key is set in the environment variables
+)
 
 # Step 2: Main Page Title & Description
 st.title('👽AI Spock Art Critique Bot🛸')
@@ -29,6 +31,11 @@ def analyze_artwork_with_gpt4_vision(user_input):
     if not api_key:
         st.error("OpenAI API key is not set. Please set it in your environment variables.")
         return "OpenAI API key not set."
+    
+    OpenAI.api_key = api_key
+    
+    # Create OpenAI client
+    client = OpenAI(api_key=api_key)
      
     # Instructions for the AI (adjust if needed)
     messages = [
@@ -38,7 +45,7 @@ def analyze_artwork_with_gpt4_vision(user_input):
     try:
         response = client.chat.completions.create(
             messages=messages,
-            model="gpt-4o-mini",
+            model="gpt-4-vision-preview",
             temperature=0  # Lower temperature for less random responses
         )
         
