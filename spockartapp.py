@@ -46,10 +46,10 @@ def analyze_artwork_with_gpt4_vision(user_input):
     except Exception as e:
         st.error(f"Error: {e}")
         return str(e)
-                label="Download Critique",
-                data=get_text_file(critique_result).read(),  # Convert buffer to string
-                file_name="critique.txt",
-                mime="text/plain"
+            label="Download Critique",
+            data=get_text_file(critique_result).read(),  # Convert buffer to string
+            file_name="critique.txt",
+            mime="text/plain"
             )
 
 # Step 5: Definition and Function to analyze UPLOAD using OpenAI
@@ -75,10 +75,10 @@ def analyze_artwork_with_gpt4_vision(uploaded_file):
     except Exception as e:
         st.error(f"Error: {e}")
         return str(e)
-                label="Download Critique",
-                data=get_text_file(critique_result).read(),  # Convert buffer to string
-                file_name="critique.txt",
-                mime="text/plain"
+            label="Download Critique",
+            data=get_text_file(critique_result).read(),  # Convert buffer to string
+            file_name="critique.txt",
+            mime="text/plain"
             )
 
 # Helper function to create a text file for download
