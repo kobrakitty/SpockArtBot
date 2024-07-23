@@ -26,8 +26,7 @@ def analyze_artwork_with_gpt4_vision(user_input):
         st.error("OpenAI API key is not set. Please set it in your environment variables.")
         return "OpenAI API key not set."
 
-    OpenAI.api_key = api_key
-        # Create OpenAI client
+    # Create OpenAI client
     client = OpenAI(api_key=api_key)
     openai.api_key = api_key
     
@@ -65,7 +64,7 @@ if submit_button and (user_input or uploaded_file):
             # Update user_input to be the local path of the uploaded file
             user_input = image_path
 
-        result = analyze_artwork_with_gpt4_vision(user_input)
+        critique_result = analyze_artwork_with_gpt4_vision(user_input) 
         
         # Show the image URL or uploaded image on the main page
         st.write("### Entered Image URL or Uploaded Image")
@@ -77,13 +76,13 @@ if submit_button and (user_input or uploaded_file):
         
         # Display the generated response
         st.write("### Generated Critique")
-        st.write(result)
+        st.write(critique_result)
 
         # Copy to clipboard button
         st.write("")
         st.write("")
         st.button("Copy to Clipboard", key="copy_button")
-        st.write(f'<textarea id="result_textarea" style="display:none;">{result}</textarea>', unsafe_allow_html=True)
+        st.write(f'<textarea id="critique_result_textarea" style="display:none;">{result}</textarea>', unsafe_allow_html=True)
         st.write("""
             <script>
                 document.querySelector('button[key="copy_button"]').onclick = function() {
@@ -101,11 +100,11 @@ if submit_button and (user_input or uploaded_file):
             with st.spinner('🌟Critiquing again...'):
                 result = analyze_artwork_with_gpt4_vision(user_input)
                 st.write("### Generated Critique")
-                st.write(result)
+                st.write(critique_result)
                 st.write("")
                 st.write("")
                 st.button("Copy to Clipboard", key="copy_button_again")
-                st.write(f'<textarea id="result_textarea" style="display:none;">{result}</textarea>', unsafe_allow_html=True)
+                st.write(f'<textarea id="critique_result_textarea" style="display:none;">{result}</textarea>', unsafe_allow_html=True)
                 st.write("""
                     <script>
                         document.querySelector('button[key="copy_button_again"]').onclick = function() {
