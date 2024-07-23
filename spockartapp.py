@@ -26,35 +26,6 @@ with st.sidebar.form(key='input_form'):
     uploaded_file = st.file_uploader("Or upload an image file", type=["jpg", "jpeg", "png"])
     submit_button = st.form_submit_button(label='SUBMIT🚀')     
     
-# Function to analyze image with GPT-4 Turbo
-if submit_button:
-    if uploaded_file:
-        # Read the uploaded file
-        image_file = BytesIO(uploaded_file.getvalue())
-        st.image(uploaded_file, caption='Your Image', use_column_width=True)
-    elif user_input:
-        # Fetch the image from URL and convert it to a BytesIO object
-        response = requests.get(user_input)
-        image_file = BytesIO(response.content)
-        st.image(user_input, caption='Your Image', use_column_width=True)
-    else:
-        st.error("No image provided.")
-        image_file = None
-
-    if image_file:
-        with st.spinner('🌟Critiquing...'):
-            critique_result = analyze_artwork_with_gpt4_vision(image_file)
-            st.markdown("### Spock Says...")
-            st.write(critique_result)
-            
-            # Add a download button for text
-            def get_text_file(content):
-                buffer = io.StringIO()
-                buffer.write(content)
-                buffer.seek(0)
-                return buffer
-
-            st.download_button(
 # Step 5: Definition and Function to analyze image using OpenAI
 def analyze_artwork_with_gpt4_vision(user_input):
     if not api_key:
@@ -80,6 +51,40 @@ def analyze_artwork_with_gpt4_vision(user_input):
         return str(e)
                 label="Download Critique",
                 data=get_text_file(critique_result).read(),  # Convert buffer to string
+                file_name="critique.txt",
+                mime="text/plain"
+            )
+# Function to analyze image with GPT-4 Turbo
+if submit_button:
+    if uploaded_file:
+        # Read the uploaded file
+        image_file = BytesIO(uploaded_file.getvalue())
+        st.image(uploaded_file, caption='Your Image', use_column_width=True)
+    elif user_input:
+        # Fetch the image from URL and convert it to a BytesIO object
+        response = requests.get(user_input)
+        image_file = BytesIO(response.content)
+        st.image(user_input, caption='Your Image', use_column_width=True)
+    else:
+        st.error("No image provided.")
+        image_file = None
+
+    if image_file:
+        with st.spinner('🌟Critiquing...'):
+            critique_result = analyze_artwork_with_gpt4_vision(image_file)
+            st.markdown("### Spock Says...")
+            st.write(critique_result)
+            
+            # Add a download button for text
+            def get_text_file(content):
+                buffer = StringIO()
+                buffer.write(content)
+                buffer.seek(0)
+                return buffer
+
+            st.download_button(
+                label="Download Critique",
+                data=get_text_file(critique_result),  # Use buffer directly
                 file_name="critique.txt",
                 mime="text/plain"
             )
