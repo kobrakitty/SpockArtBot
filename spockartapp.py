@@ -36,7 +36,7 @@ def analyze_artwork_with_gpt4_vision(user_input):
     try:
         response = client.chat.completions.create(
             messages=messages,
-            model="gpt-4-vision-preview",
+            model="gpt-4",
             temperature=0  # Lower temperature for less random responses
         )
         
