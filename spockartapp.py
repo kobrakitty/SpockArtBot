@@ -49,7 +49,7 @@ def analyze_artwork_with_gpt4_vision(user_input):
 
 # Step 6: Handle form submission and display result
 if submit_button:
-    image_url = user_input_url if user_input_url else None
+    image_url = user_input if user_input else None
     if uploaded_file is not None:
         # Save the uploaded file to a temporary location
         with open("temp_image", "wb") as f:
