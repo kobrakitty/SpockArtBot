@@ -59,7 +59,11 @@ if submit_button and (user_input or uploaded_file):
     with st.spinner('🌟Critiquing...'):
         # If a file is uploaded, use that file for the critique
         if uploaded_file:
-            # Save the uploaded file to a temporary location
+            # Create the "temp" directory if it doesn't exist
+            if not os.path.exists("temp"):
+                os.makedirs("temp")
+
+            # Save the uploaded file to the "temp" directory
             image_path = os.path.join("temp", uploaded_file.name)
             with open(image_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
