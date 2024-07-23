@@ -8,7 +8,7 @@ api_key = os.getenv("OPENAI_API_KEY")  # Used in production
 
 # Step 2: Main Page Title & Description
 st.title('👽Spock Art Critique🛸')
-st.subheader('I am the AI Spock Art Critique Bot. I critique art you share with me using an image URL. Your image and my critique will appear below after my critique is complete.✨Remember, always verify AI-generated responses.')
+st.subheader('I am the AI Spock Art Critique Bot. I critique art you share with me using an image URL. Your image and my critique will appear below after my critique is complete.✨')
 
 # Step 3: Sidebar Title and Design Elements
 st.sidebar.title("Try It Out🎨")
