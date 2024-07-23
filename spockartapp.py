@@ -2,6 +2,7 @@
 import streamlit as st
 from openai import OpenAI
 import os
+import io
 
 # Get your OpenAI API key from environment variables
 api_key = os.getenv("OPENAI_API_KEY")  # Used in production
@@ -65,5 +66,16 @@ if submit_button:
             st.markdown("### Spock Says...")
             st.write(critique_result)
             
-            # Add a button to copy the critique result
-            st.text_area("Critique Result (copy to clipboard):", critique_result, height=200)    
+            # Add a download button for text
+            def get_text_file(content):
+                buffer = io.StringIO()
+                buffer.write(content)
+                buffer.seek(0)
+                return buffer
+
+            st.download_button(
+                label="Download Critique",
+                data=get_text_file(critique_result).read(),  # Convert buffer to string
+                file_name="critique.txt",
+                mime="text/plain"
+            )
