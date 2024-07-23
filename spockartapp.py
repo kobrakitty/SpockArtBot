@@ -10,7 +10,7 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # Step 2: Main Page Title & Description
 st.title('👽AI Spock Art Critique Bot🛸')
-st.subheader('I am AI Spock Art Critique Bot. I critique art shared with me using an image URL or uploaded image. Your image and my critique will appear below. Have fun!', divider='rainbow')
+st.subheader('I critique art shared with me using an image URL or uploaded image. Your image and my critique will appear below. Have fun!', divider='rainbow')
 
 # Step 3: Sidebar Title and Design Elements
 st.sidebar.title("Try It Out🎨")
@@ -36,7 +36,7 @@ def analyze_artwork_with_gpt4_vision(user_input):
     try:
         response = client.chat.completions.create(
             messages=messages,
-            model="gpt-4-turbo",
+            model="gpt-4-turbo-preview",
             temperature=0  # Lower temperature for less random responses
         )
         
