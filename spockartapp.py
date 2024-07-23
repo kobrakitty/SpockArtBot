@@ -2,7 +2,6 @@
 import streamlit as st
 from openai import OpenAI
 import os
-import streamlit_copy_to_clipboard as stc
 
 # Get your OpenAI API key from environment variables
 api_key = os.getenv("OPENAI_API_KEY")  # Used in production
@@ -80,9 +79,23 @@ if submit_button and (user_input or uploaded_file):
         # Display the generated response
         st.write("### Generated Critique")
         st.write(result)
-        
+
         # Copy to clipboard button
-        stc.copy_to_clipboard(result)
+        st.write("")
+        st.write("")
+        st.button("Copy to Clipboard", key="copy_button")
+        st.write(f'<textarea id="result_textarea" style="display:none;">{result}</textarea>', unsafe_allow_html=True)
+        st.write("""
+            <script>
+                document.querySelector('button[key="copy_button"]').onclick = function() {
+                    const textarea = document.getElementById("result_textarea");
+                    textarea.style.display = "block";
+                    textarea.select();
+                    document.execCommand("copy");
+                    textarea.style.display = "none";
+                }
+            </script>
+        """, unsafe_allow_html=True)
         
         # Option to iterate further
         if st.button("Generate Again"):
@@ -90,4 +103,18 @@ if submit_button and (user_input or uploaded_file):
                 result = critique_art(user_input)
                 st.write("### Generated Critique")
                 st.write(result)
-                stc.copy_to_clipboard(result)   
+                st.write("")
+                st.write("")
+                st.button("Copy to Clipboard", key="copy_button_again")
+                st.write(f'<textarea id="result_textarea" style="display:none;">{result}</textarea>', unsafe_allow_html=True)
+                st.write("""
+                    <script>
+                        document.querySelector('button[key="copy_button_again"]').onclick = function() {
+                            const textarea = document.getElementById("result_textarea");
+                            textarea.style.display = "block";
+                            textarea.select();
+                            document.execCommand("copy");
+                            textarea.style.display = "none";
+                        }
+                    </script>
+                """, unsafe_allow_html=True)
