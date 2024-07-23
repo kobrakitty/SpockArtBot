@@ -10,7 +10,7 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # Step 2: Main Page Title & Description
 st.title('👽AI Spock Art Critique Bot🛸')
-st.subheader('I am AI Spock Art Critique Bot. I critique art shared with me using an image URL. Your image and my critique will appear below. Have fun!', divider='rainbow')
+st.subheader('I am AI Spock Art Critique Bot. I critique art shared with me using an image URL or uploaded image. Your image and my critique will appear below. Have fun!', divider='rainbow')
 
 # Step 3: Sidebar Title and Design Elements
 st.sidebar.title("Try It Out🎨")
@@ -64,7 +64,7 @@ if submit_button:
             st.markdown("### Spock Says...")
             st.write(critique_result)
 
-            # Add a button to download the critique result
+            # Add a download button for text
             def get_text_file(content):
                 buffer = io.StringIO()
                 buffer.write(content)
@@ -73,7 +73,7 @@ if submit_button:
 
             st.download_button(
                 label="Download Critique",
-                data=get_text_file(critique_result),
+                data=get_text_file(critique_result).read(),  # Convert buffer to string
                 file_name="critique.txt",
                 mime="text/plain"
             )
