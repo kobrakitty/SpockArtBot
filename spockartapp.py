@@ -4,10 +4,7 @@ import openai
 import os
 
 # Get your OpenAI API key from environment variables
-# api_key = os.getenv("OPENAI_API_KEY")  # Used in production
-
-# Uncomment the next line and add your API key for local testing
-api_key = "your_openai_api_key_here"
+api_key = os.getenv("OPENAI_API_KEY")  # Used in production
 
 # Step 2: Main Page Title & Description
 st.title('👽Spock Art Critique🛸')
@@ -24,7 +21,7 @@ with st.sidebar.form(key='input_form'):
     submit_button = st.form_submit_button(label='🚀Submit🚀!')
 
 # Step 5: Definition and Function to analyze image using OpenAI
-def critique_art(image_url):
+def analyze_artwork_with_gpt4_vision(user_input):
     if not api_key:
         st.error("OpenAI API key is not set. Please set it in your environment variables.")
         return "OpenAI API key not set."
@@ -33,20 +30,22 @@ def critique_art(image_url):
     
     # Instructions for the AI (adjust if needed)
     messages = [
-        {"role": "system", "content": "You are Spock from the original Star Trek series from the 1960s. Your main purpose is to provide art critiques of images that you review based on the URL that a user enters. Your answers should be logical, concise, and devoid of emotional language. Maintain a formal tone, using precise vocabulary and structured sentences. Include scientific or analytical explanations where applicable. Critique only the art provided via URL. The AI chatbot should only respond to prompts that include a URL to a piece of art. If a prompt does not include a URL, the chatbot should respond with: Please provide a URL to the artwork you wish to be critiqued. The critique should focus on aspects such as composition, use of color, technique, perspective, and thematic elements. You will avoid subjective language; instead, rely on objective observations and logical analysis. Ask clarifying questions if additional information is needed to provide a logical response."},
-        {"role": "user", "content": f"Review the following image from the URL:\n{image_url}"}
+        {"role": "system", "content": "You are Spock from the original Star Trek series from the 1960s. Your main purpose is to provide art critiques of images from the user. Your answers should be logical, concise, and devoid of emotional language. Maintain a formal tone, using precise vocabulary and structured sentences. Include scientific or analytical explanations where applicable. The critique should focus on aspects such as composition, use of color, technique, perspective, and thematic elements. You will avoid subjective language; instead, rely on objective observations and logical analysis. Ask clarifying questions if additional information is needed to provide a logical response."},
+        {"role": "user", "content": f"Review the following image:\n{user_input}"}
     ]
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        response = client.chat.completions.create(
             messages=messages,
+            model="gpt-4-vision-preview",
             temperature=0  # Lower temperature for less random responses
         )
-        return response['choices'][0]['message']['content']
+        
+        # Extract the critique from the response
+        return response.choices[0].message.content
     except Exception as e:
         st.error(f"Error: {e}")
         return str(e)
-
+    
 # Step 6: Handle form submission and display result
 if submit_button and (user_input or uploaded_file):
     with st.spinner('🌟Critiquing...'):
@@ -63,7 +62,7 @@ if submit_button and (user_input or uploaded_file):
             # Update user_input to be the local path of the uploaded file
             user_input = image_path
 
-        result = critique_art(user_input)
+        result = analyze_artwork_with_gpt4_vision(user_input)
         
         # Show the image URL or uploaded image on the main page
         st.write("### Entered Image URL or Uploaded Image")
@@ -97,7 +96,7 @@ if submit_button and (user_input or uploaded_file):
         # Option to iterate further
         if st.button("Generate Again"):
             with st.spinner('🌟Critiquing again...'):
-                result = critique_art(user_input)
+                result = analyze_artwork_with_gpt4_vision(user_input)
                 st.write("### Generated Critique")
                 st.write(result)
                 st.write("")
