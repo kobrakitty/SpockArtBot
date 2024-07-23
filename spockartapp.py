@@ -25,7 +25,10 @@ def analyze_artwork_with_gpt4_vision(user_input):
     if not api_key:
         st.error("OpenAI API key is not set. Please set it in your environment variables.")
         return "OpenAI API key not set."
-    
+
+    OpenAI.api_key = api_key
+        # Create OpenAI client
+    client = OpenAI(api_key=api_key)
     openai.api_key = api_key
     
     # Instructions for the AI (adjust if needed)
