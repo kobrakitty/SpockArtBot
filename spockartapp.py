@@ -1,4 +1,5 @@
 # Step 1: Setup
+import base64
 import streamlit as st
 from openai import OpenAI
 import os
@@ -26,7 +27,11 @@ with st.sidebar.form(key='input_form'):
     uploaded_file = st.file_uploader("Or upload an image file", type=["jpg", "jpeg", "png"])
     submit_button = st.form_submit_button(label='SUBMIT🚀')
 
-# Step 5: Definition and Function to analyze image using OpenAI
+import base64
+
+def encode_image(image_file):
+    return base64.b64encode(image_file.getvalue()).decode('utf-8')
+
 def analyze_artwork_with_gpt4_vision(image_input):
     if not api_key:
         st.error("OpenAI API key is not set. Please set it in your environment variables.")
@@ -34,9 +39,14 @@ def analyze_artwork_with_gpt4_vision(image_input):
     
     client = OpenAI(api_key=api_key)
     
+    if isinstance(image_input, str):  # It's a URL
+        image_content = image_input
+    else:  # It's an uploaded file
+        image_content = f"data:image/jpeg;base64,{encode_image(image_input)}"
+    
     messages = [
         {"role": "system", "content": "You are Spock from the original Star Trek series from the 1960s. Your main purpose is to provide art critiques of images from the user. Your answers should be logical, concise, and devoid of emotional language. Maintain a formal tone, using precise vocabulary and structured sentences. Include scientific or analytical explanations where applicable. The critique should focus on aspects such as composition, use of color, technique, perspective, and thematic elements. You will avoid subjective language; instead, rely on objective observations and logical analysis. Ask clarifying questions if additional information is needed to provide a logical response."},
-        {"role": "user", "content": [{"type": "image", "image": image_input}, "Analyze this image."]}
+        {"role": "user", "content": [{"type": "image", "image": image_content}, "Analyze this image."]}
     ]
     
     try:
@@ -51,13 +61,13 @@ def analyze_artwork_with_gpt4_vision(image_input):
         st.error(f"Error: {e}")
         return str(e)
 
-# Step 6: Handle form submission and display result
+# In the form submission handling section:
 if submit_button:
     image_input = None
     if user_input:
         image_input = user_input  # This is the URL
     elif uploaded_file is not None:
-        image_input = uploaded_file.getvalue()  # This is the file content
+        image_input = uploaded_file  # This is the uploaded file object
     
     if image_input:
         with st.spinner('🌟Critiquing...'):
