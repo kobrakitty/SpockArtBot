@@ -27,29 +27,25 @@ with st.sidebar.form(key='input_form'):
     submit_button = st.form_submit_button(label='SUBMIT🚀')
 
 # Step 5: Definition and Function to analyze image using OpenAI
-def analyze_artwork_with_gpt4_vision(user_input):
+def analyze_artwork_with_gpt4_vision(image_input):
     if not api_key:
         st.error("OpenAI API key is not set. Please set it in your environment variables.")
         return "OpenAI API key not set."
     
-    OpenAI.api_key = api_key
-    
-    # Create OpenAI client
     client = OpenAI(api_key=api_key)
-     
-    # Instructions for the AI (adjust if needed)
+    
     messages = [
         {"role": "system", "content": "You are Spock from the original Star Trek series from the 1960s. Your main purpose is to provide art critiques of images from the user. Your answers should be logical, concise, and devoid of emotional language. Maintain a formal tone, using precise vocabulary and structured sentences. Include scientific or analytical explanations where applicable. The critique should focus on aspects such as composition, use of color, technique, perspective, and thematic elements. You will avoid subjective language; instead, rely on objective observations and logical analysis. Ask clarifying questions if additional information is needed to provide a logical response."},
-        {"role": "user", "content": f"Review the following image:\n{user_input}"}
+        {"role": "user", "content": [{"type": "image", "image": image_input}, "Analyze this image."]}
     ]
+    
     try:
         response = client.chat.completions.create(
-            messages=messages,
             model="gpt-4-vision-preview",
-            temperature=0  # Lower temperature for less random responses
+            messages=messages,
+            max_tokens=300
         )
         
-        # Extract the critique from the response
         return response.choices[0].message.content
     except Exception as e:
         st.error(f"Error: {e}")
@@ -57,18 +53,22 @@ def analyze_artwork_with_gpt4_vision(user_input):
 
 # Step 6: Handle form submission and display result
 if submit_button:
-    image_url = user_input if user_input else None
-    if uploaded_file is not None:
-        # Save the uploaded file to a temporary location
-        with open("temp_image", "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        image_url = "temp_image"  # Set image_url to the temporary file path
-
-    if image_url:
+    image_input = None
+    if user_input:
+        image_input = user_input  # This is the URL
+    elif uploaded_file is not None:
+        image_input = uploaded_file.getvalue()  # This is the file content
+    
+    if image_input:
         with st.spinner('🌟Critiquing...'):
-            critique_result = analyze_artwork_with_gpt4_vision(image_url) 
+            critique_result = analyze_artwork_with_gpt4_vision(image_input)
+            
             # Display the image
-            st.image(image_url, caption='Your Image', use_column_width=True)
+            if isinstance(image_input, str):  # If it's a URL
+                st.image(image_input, caption='Your Image', use_column_width=True)
+            else:  # If it's an uploaded file
+                st.image(image_input, caption='Your Image', use_column_width=True)
+            
             # Display the generated response
             st.markdown("### Spock Says...")
             st.write(critique_result)
@@ -82,7 +82,9 @@ if submit_button:
 
             st.download_button(
                 label="Download Critique",
-                data=get_text_file(critique_result).read(),  # Convert buffer to string
+                data=get_text_file(critique_result).read(),
                 file_name="critique.txt",
                 mime="text/plain"
             )
+    else:
+        st.error("Please provide either an image URL or upload an image file.")
