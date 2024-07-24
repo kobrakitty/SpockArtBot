@@ -3,7 +3,8 @@ import base64
 import streamlit as st
 from openai import OpenAI
 import os
-import io
+from io import BytesIO
+from PIL import Image
 
 # Get your OpenAI API key from environment variables
 api_key = os.getenv("OPENAI_API_KEY")  # Used in production
@@ -27,10 +28,24 @@ with st.sidebar.form(key='input_form'):
     uploaded_file = st.file_uploader("Or upload an image file", type=["jpg", "jpeg", "png"])
     submit_button = st.form_submit_button(label='SUBMIT🚀')
 
-import base64
-
 def encode_image(image_file):
-    return base64.b64encode(image_file.getvalue()).decode('utf-8')
+    # Open the image using Pillow
+    img = Image.open(image_file)
+    
+    # Convert to RGB if it's not
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+    
+    # Resize if the image is too large
+    max_size = (1024, 1024)  # OpenAI's max size
+    img.thumbnail(max_size, Image.LANCZOS)
+    
+    # Save the image to a bytes buffer
+    buffered = BytesIO()
+    img.save(buffered, format="JPEG")
+    
+    # Encode the image
+    return base64.b64encode(buffered.getvalue()).decode('utf-8')
 
 def analyze_artwork_with_gpt4_vision(image_input):
     if not api_key:
@@ -39,17 +54,17 @@ def analyze_artwork_with_gpt4_vision(image_input):
     
     client = OpenAI(api_key=api_key)
     
-    if isinstance(image_input, str):  # It's a URL
-        image_content = image_input
-    else:  # It's an uploaded file
-        image_content = f"data:image/jpeg;base64,{encode_image(image_input)}"
-    
-    messages = [
-        {"role": "system", "content": "You are Spock from the original Star Trek series from the 1960s. Your main purpose is to provide art critiques of images from the user. Your answers should be logical, concise, and devoid of emotional language. Maintain a formal tone, using precise vocabulary and structured sentences. Include scientific or analytical explanations where applicable. The critique should focus on aspects such as composition, use of color, technique, perspective, and thematic elements. You will avoid subjective language; instead, rely on objective observations and logical analysis. Ask clarifying questions if additional information is needed to provide a logical response."},
-        {"role": "user", "content": [{"type": "image", "image": image_content}, "Analyze this image."]}
-    ]
-    
     try:
+        if isinstance(image_input, str):  # It's a URL
+            image_content = image_input
+        else:  # It's an uploaded file
+            image_content = f"data:image/jpeg;base64,{encode_image(image_input)}"
+        
+        messages = [
+            {"role": "system", "content": "You are Spock from the original Star Trek series from the 1960s. Your main purpose is to provide art critiques of images from the user. Your answers should be logical, concise, and devoid of emotional language. Maintain a formal tone, using precise vocabulary and structured sentences. Include scientific or analytical explanations where applicable. The critique should focus on aspects such as composition, use of color, technique, perspective, and thematic elements. You will avoid subjective language; instead, rely on objective observations and logical analysis. Ask clarifying questions if additional information is needed to provide a logical response."},
+            {"role": "user", "content": [{"type": "image", "image": image_content}, "Analyze this image."]}
+        ]
+        
         response = client.chat.completions.create(
             model="gpt-4-vision-preview",
             messages=messages,
@@ -60,41 +75,3 @@ def analyze_artwork_with_gpt4_vision(image_input):
     except Exception as e:
         st.error(f"Error: {e}")
         return str(e)
-
-# In the form submission handling section:
-if submit_button:
-    image_input = None
-    if user_input:
-        image_input = user_input  # This is the URL
-    elif uploaded_file is not None:
-        image_input = uploaded_file  # This is the uploaded file object
-    
-    if image_input:
-        with st.spinner('🌟Critiquing...'):
-            critique_result = analyze_artwork_with_gpt4_vision(image_input)
-            
-            # Display the image
-            if isinstance(image_input, str):  # If it's a URL
-                st.image(image_input, caption='Your Image', use_column_width=True)
-            else:  # If it's an uploaded file
-                st.image(image_input, caption='Your Image', use_column_width=True)
-            
-            # Display the generated response
-            st.markdown("### Spock Says...")
-            st.write(critique_result)
-            
-            # Add a download button for text
-            def get_text_file(content):
-                buffer = io.StringIO()
-                buffer.write(content)
-                buffer.seek(0)
-                return buffer
-
-            st.download_button(
-                label="Download Critique",
-                data=get_text_file(critique_result).read(),
-                file_name="critique.txt",
-                mime="text/plain"
-            )
-    else:
-        st.error("Please provide either an image URL or upload an image file.")
